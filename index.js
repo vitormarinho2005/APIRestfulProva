@@ -40,3 +40,24 @@ app.get('/logs/:id', (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
+
+app.delete('/logs/:id', (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const conteudo = fs.readFileSync('logs.txt', 'utf8');
+    const linhas = conteudo.split('\n');
+
+    const novasLinhas = linhas.filter((linha) => !linha.startsWith(id));
+    const encontrou = linhas.length !== novasLinhas.length;
+
+    if (!encontrou) {
+      return res.status(404).json({ error: 'Log não encontrado para deletar.' });
+    }
+
+    fs.writeFileSync('logs.txt', novasLinhas.join('\n'), 'utf8');
+    res.status(200).json({ message: 'Log deletado com sucesso.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar o log.' });
+  }
+});
